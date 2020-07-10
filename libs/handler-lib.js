@@ -1,9 +1,15 @@
+import * as debug from './debug-lib';
+
 export default function handler(lambda) {
 	return function (event, context) {
+		debug.init(event, context);
 		return Promise.resolve()
 			.then(() => lambda(event, context))
 			.then((body) => [200, body])
-			.catch((e) => [500, { error: e.message }])
+			.catch((e) => {
+				debug.flush(e);
+				return [500, { error: e.message }];
+			})
 			.then(([statusCode, body]) => ({
 				statusCode,
 				headers: {
